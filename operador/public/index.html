@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>I-BOX VR - Painel Operador (MVP)</title>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #050816;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .pc-grid {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .pc-card {
+      background: #111827;
+      border-radius: 10px;
+      padding: 16px;
+      min-width: 220px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    }
+    .pc-card h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    .status {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .status.online {
+      color: #4ade80;
+    }
+    .status.offline {
+      color: #f97373;
+    }
+    button {
+      display: inline-block;
+      margin: 4px 4px 4px 0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    button.danger {
+      background: #ef4444;
+    }
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    #log {
+      margin-top: 20px;
+      background: #020617;
+      padding: 10px;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>I-BOX VR - Painel Operador (MVP)</h1>
+  <p>Controle inicial das estações. PCs conectados aparecem abaixo.</p>
+
+  <div class="pc-grid" id="pcGrid"></div>
+
+  <div id="log"></div>
+
+  <script>
+    const socket = io();
+
+    const pcGrid = document.getElementById("pcGrid");
+    const logEl = document.getElementById("log");
+
+    let pcs = [];
+
+    function log(message) {
+      const time = new Date().toLocaleTimeString();
+      logEl.textContent += `[${time}] ${message}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderPcs() {
+      pcGrid.innerHTML = "";
+      const knownPcs = ["PC1", "PC2"]; // você pode expandir depois (PC3, PC4...)
+
+      knownPcs.forEach((pcId) => {
+        const online = pcs.includes(pcId);
+        const card = document.createElement("div");
+        card.className = "pc-card";
+
+        card.innerHTML = `
+          <h2>${pcId}</h2>
+          <div class="status ${online ? "online" : "offline"}">
+            Status: ${online ? "Online" : "Offline"}
+          </div>
+          <button ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', 'start_game')">
+            Iniciar jogo
+          </button>
+          <button class="danger" ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', 'stop_game')">
+            Fechar jogo
+          </button>
+          <button ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', 'ping')">
+            Ping / Status
+          </button>
+        `;
+        pcGrid.appendChild(card);
+      });
+    }
+
+    function sendCommand(pcId, action) {
+      socket.emit("send_command", { pcId, action });
+      log(`Comando enviado: ${action} → ${pcId}`);
+    }
+
+    socket.on("pc_list", (pcIds) => {
+      pcs = pcIds;
+      renderPcs();
+    });
+
+    socket.on("pc_status_update", (payload) => {
+      log(`Status de ${payload.pcId}: ${JSON.stringify(payload)}`);
+    });
+
+    socket.on("command_result", (result) => {
+      log(`Resultado comando [${result.pcId} | ${result.action}]: ${result.ok ? "OK" : "ERRO"} - ${result.message}`);
+    });
+
+    // inicial
+    renderPcs();
+  </script>
+</body>
+</html>
