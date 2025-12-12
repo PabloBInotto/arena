@@ -2,13 +2,27 @@ const io = require("socket.io-client");
 const { exec } = require("child_process");
 
 const pcId = process.argv[2] || "PC1"; // passe PC1 / PC2 na linha de comando
-const SERVER_URL = "http://localhost:3000"; // ajuste aqui
+const SERVER_URL = "https://9c0504174661.ngrok.app"; // ajuste aqui
 
-const socket = io(SERVER_URL);
+const socket = io(SERVER_URL, {
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 2000
+});
+
+function register() {
+  socket.emit("register_pc", pcId);
+  sendStatus();
+}
 
 socket.on("connect", () => {
   console.log(`Conectado ao operador como ${pcId}`);
-  socket.emit("register_pc", pcId);
+  register();
+});
+
+socket.on("reconnect", () => {
+  console.log(`Reconectado ao operador como ${pcId}`);
+  register();
 });
 
 socket.on("disconnect", () => {
