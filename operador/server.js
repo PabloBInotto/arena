@@ -18,6 +18,8 @@ const pcs = {};
 
 io.on("connection", (socket) => {
   console.log("Nova conexão socket:", socket.id);
+  
+  socket.emit("pc_list", Object.keys(pcs));
 
   socket.on("register_pc", (pcId) => {
     pcs[pcId] = socket;
@@ -71,6 +73,6 @@ io.of("/").on("connection", (socket) => {
 });
 
 const PORT = 3000;
-server.listen(PORT, () => {
-  console.log(`Operador rodando em http://localhost:${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Operador rodando em http://0.0.0.0:${PORT}`);
 });
