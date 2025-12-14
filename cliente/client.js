@@ -1,8 +1,10 @@
 const io = require("socket.io-client");
 const { exec } = require("child_process");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const pcId = process.argv[2] || "PC1"; // passe PC1 / PC2 na linha de comando
-const SERVER_URL = "https://9c0504174661.ngrok.app"; // ajuste aqui
+const SERVER_URL = process.env.SERVER_URL; // ajuste aqui
 
 const socket = io(SERVER_URL, {
   reconnection: true,
