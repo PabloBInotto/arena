@@ -108,10 +108,10 @@
           <div class="status ${online ? "online" : "offline"}">
             Status: ${online ? "Online" : "Offline"}
           </div>
-          <button ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', 'start_game')">
+          <button ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', '{action: \'start_game\', game: \'Propagation\'}')">
             Iniciar jogo
           </button>
-          <button class="danger" ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', 'stop_game')">
+          <button class="danger" ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', '{action: \'stop_game\', game: \'Propagation\'}')">
             Fechar jogo
           </button>
           <button ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', 'ping')">

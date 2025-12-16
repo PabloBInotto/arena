@@ -34,47 +34,84 @@ socket.on("disconnect", () => {
 socket.on("command", ({ action }) => {
   console.log(`Comando recebido: ${action}`);
 
-  if (action === "start_game") {
-    startGame();
+  if (action.task === "start_game") {
+    startSession(action.game);
   } else if (action === "stop_game") {
-    stopGame();
-  } else if (action === "ping") {
+    stopSession(action.game);
+  } else if (action.task === "ping") {
     sendStatus();
   }
+
 });
 
-function startGame() {
-  console.log("Simulando abertura do Propagation VR...");
+function startSession(game) {
+  console.log(`Iniciando ${game} VR...`);
 
-  // TODO: aqui você coloca o comando real.
-  // Exemplo (Windows, abrindo Steam com appid - AJUSTAR O CAMINHO E APPID):
-  //
-  // const cmd = `"C:\\Program Files (x86)\\Steam\\steam.exe" -applaunch APPID_DO_PROPAGATION`;
-  // exec(cmd, (err) => {
-  //   if (err) {
-  //     console.error("Erro ao abrir jogo:", err);
-  //   } else {
-  //     console.log("Jogo iniciado.");
-  //   }
-  // });
+  //TODO: adicionar verificação se já está rodando
+  //TODO: adicionar query para coletar configs do jogo no DB
 
-  sendStatus();
+  const steamPath = `"C:\\Program Files (x86)\\Steam\\steam.exe"`;
+  const appId = "1363430";
+
+  const cmd = `${steamPath} -applaunch ${appId}`;
+
+  exec(cmd, (err) => {
+    if (err) {
+      console.error("Erro ao iniciar jogo:", err);
+      socket.emit("pc_status", {
+        pcId,
+        online: true,
+        error: "Falha ao iniciar jogo"
+      });
+      return;
+    }
+
+    console.log("Propagation VR iniciado com sucesso.");
+    sendStatus();
+  });
 }
 
-function stopGame() {
-  console.log("Simulando fechamento do Propagation VR...");
+async function stopGame(game) {
+  console.log(`Encerrando ${game} VR...`);
 
-  // TODO: aqui você coloca o comando real.
-  // Exemplo no Windows, se souber o nome do executável:
-  //
-  // exec('taskkill /IM PropagationVR.exe /F', (err) => {
-  //   if (err) {
-  //     console.error("Erro ao fechar jogo:", err);
-  //   } else {
-  //     console.log("Jogo fechado.");
-  //   }
-  // });
+  exec(`taskkill /IM ${game}.exe /F`, (err) => {
+    if (err) {
+      console.error("Erro ao fechar jogo:", err);
+    } else {
+      console.log(`${game} VR encerrado.`);
+    }
+  });
+}
 
+async function stopServer() {
+  console.log("Encerrando Propagation VR...");
+
+  exec('taskkill /IM vrserver.exe /F', (err) => {
+    if (err) {
+      console.error("Erro ao fechar jogo:", err);
+    } else {
+      console.log("Propagation VR encerrado.");
+    }
+  });
+}
+
+async function stopMonitorVR() {
+  console.log("Encerrando Propagation VR...");
+
+  exec('taskkill /IM vrmonitor.exe /F', (err) => {
+    if (err) {
+      console.error("Erro ao fechar jogo:", err);
+    } else {
+      console.log("Propagation VR encerrado.");
+    }
+  });
+}
+
+async function stopSession(game) {
+  console.log("Encerrando sessão arena VR...");
+  await stopGame(game);
+  await stopServer();
+  await stopMonitorVR();
   sendStatus();
 }
 
