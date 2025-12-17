@@ -31,14 +31,14 @@ socket.on("disconnect", () => {
   console.log("Desconectado do operador");
 });
 
-socket.on("command", ({ action }) => {
+socket.on("command", ({ action, game }) => {
   console.log(`Comando recebido: ${action}`);
 
-  if (action.task === "start_game") {
-    startSession(action.game);
+  if (action === "start_game") {
+    startSession(game);
   } else if (action === "stop_game") {
-    stopSession(action.game);
-  } else if (action.task === "ping") {
+    stopSession(game);
+  } else if (action=== "ping") {
     sendStatus();
   }
 
@@ -51,9 +51,8 @@ function startSession(game) {
   //TODO: adicionar query para coletar configs do jogo no DB
 
   const steamPath = `"C:\\Program Files (x86)\\Steam\\steam.exe"`;
-  const appId = "1363430";
 
-  const cmd = `${steamPath} -applaunch ${appId}`;
+  const cmd = `${steamPath} -applaunch ${game}`;
 
   exec(cmd, (err) => {
     if (err) {

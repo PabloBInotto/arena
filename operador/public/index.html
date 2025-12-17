@@ -108,10 +108,11 @@
           <div class="status ${online ? "online" : "offline"}">
             Status: ${online ? "Online" : "Offline"}
           </div>
-          <button ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', '{action: \'start_game\', game: \'Propagation\'}')">
+          
+          <button ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', 'start_game', '1363430')">
             Iniciar jogo
           </button>
-          <button class="danger" ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', '{action: \'stop_game\', game: \'Propagation\'}')">
+          <button ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', 'stop_game', '1363430')" class="danger">
             Fechar jogo
           </button>
           <button ${!online ? "disabled" : ""} onclick="sendCommand('${pcId}', 'ping')">
@@ -122,8 +123,8 @@
       });
     }
 
-    function sendCommand(pcId, action) {
-      socket.emit("send_command", { pcId, action });
+    function sendCommand(pcId, action, game = null) {
+      socket.emit("send_command", { pcId, action, game });
       log(`Comando enviado: ${action} → ${pcId}`);
     }
 

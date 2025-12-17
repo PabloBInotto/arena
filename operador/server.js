@@ -47,7 +47,7 @@ io.on("connection", (socket) => {
 
 // Endpoint para o painel enviar comandos
 io.of("/").on("connection", (socket) => {
-  socket.on("send_command", ({ pcId, action }) => {
+  socket.on("send_command", ({ pcId, action, game }) => {
     const target = pcs[pcId];
     if (!target) {
       console.log(`PC ${pcId} não encontrado`);
@@ -61,7 +61,7 @@ io.of("/").on("connection", (socket) => {
     }
 
     console.log(`Enviando comando ${action} para ${pcId}`);
-    target.emit("command", { action });
+    target.emit("command", { action, game });
 
     socket.emit("command_result", {
       pcId,
